@@ -4,6 +4,8 @@
 
 This library provides PostgreSQL physical (database) and logical (PostgreSQL schemas) sharding following [Instagram's pattern](http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram).
 
+Documentation: http://hexdocs.pm/ecto_instashard/
+
 ## Main Features
 - Unlimited databases and logical shards (PostgreSQL schemas). Ecto Repository modules are generated dynamically – according to sharding configuration.
 - Id hashing to choose the related shard.
