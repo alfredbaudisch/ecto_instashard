@@ -46,8 +46,7 @@ defmodule Ecto.InstaShard.Mixfile do
     [name: :ecto_instashard,
      maintainers: ["Alfred Reinold Baudisch"],
      licenses: ["Apache 2.0"],
-     links: %{"GitHub" => "https://github.com/alfredbaudisch/ecto_instashard",
-              "Docs" => "http://hexdocs.pm/ecto_instashard/"},
+     links: %{"GitHub" => "https://github.com/alfredbaudisch/ecto_instashard"},
      files: ~w(mix.exs README.md lib LICENSE)]
   end
 end
