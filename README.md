@@ -137,7 +137,7 @@ defmodule ChatApp do
     |> ChatApp.Shards.Messages.include_repository_supervisor
     # Your other children
 
-    opts = [strategy: :one_for_one, name: Fred.Data.Supervisor]
+    opts = [strategy: :one_for_one, name: ChatApp.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end
