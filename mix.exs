@@ -7,7 +7,7 @@ defmodule Ecto.InstaShard.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     docs: [source_ref: "v#{@version}", main: "readme", extras: ["README.md"]],
+     docs: [source_ref: "v0.1.0", main: "readme", extras: ["README.md"]],
      description: description(),
      package: package(),
      deps: deps()]
