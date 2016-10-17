@@ -106,7 +106,7 @@ defmodule ChatApp.Shards.Messages do
   use Ecto.InstaShard.Sharding.Setup, config: [
     config_key: :message_databases,
     app_name: Mix.Project.config[:app],
-    base_module: ChatApp.ShardedRepositories,
+    base_module_name: ChatApp.ShardedRepositories,
     # [base_module].[name][physical shard], i.e. ChatApp.ShardedRepositories.Messages0
     name: "Messages",
     # the sharded table
