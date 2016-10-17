@@ -1,5 +1,8 @@
 # Ecto.InstaShard
 
+[![Hex.pm](https://img.shields.io/hexpm/v/ecto_instashard.svg?style=flat-square)](https://hex.pm/packages/ecto_instashard)
+[![Hex.pm](https://img.shields.io/hexpm/dt/ecto_instashard.svg?style=flat-square)](https://hex.pm/packages/ecto_instashard)
+
 > Dynamic Instagram-like PostgreSQL sharding with Ecto
 
 This library provides PostgreSQL physical (database) and logical (PostgreSQL schemas) sharding following [Instagram's pattern](http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram).
