@@ -15,8 +15,8 @@ defmodule Ecto.InstaShard.Sharding do
     mod
   end
 
-  def repository_module_name(name, position) do
-    Module.concat(["#{name}#{position}"])
+  def repository_module_name(base, name, position) do
+    Module.concat([base, "#{name}#{position}"])
   end
 
   def do_create_module(name, position, table) do

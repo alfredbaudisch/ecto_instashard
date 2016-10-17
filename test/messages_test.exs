@@ -25,6 +25,7 @@ defmodule Ecto.InstaShard.Messages do
 
   @amount_shards setup_key(:logical_shards)
   @amount_databases setup_key(:count)
+  @base_module_name Ecto.InstaShard.ShardedRepositories
   @messages_repository "Messages"
   @messages_table "messages"
   @amount_items 10
@@ -56,7 +57,7 @@ defmodule Ecto.InstaShard.Messages do
   describe "Repository Modules" do
     test "repository module name is correct for database name" do
       for n <- 0..@amount_databases - 1 do
-        assert Ecto.InstaShard.Sharding.repository_module_name(@messages_repository, n) == Module.concat(["#{@messages_repository}#{n}"])
+        assert Ecto.InstaShard.Sharding.repository_module_name(@base_module_name, @messages_repository, n) == Module.concat([@base_module_name, "#{@messages_repository}#{n}"])
       end
     end
 

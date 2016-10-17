@@ -21,6 +21,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         raise "Config #{unquote(config[:config_key])} can't be nil"
       end
 
+      @base_module_name unquote(config[:base_module_name])
       @mapping @setup[:mapping]
       @repository_name unquote(config[:name])
       @table_name unquote(config[:table])
@@ -73,7 +74,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         mod = repository_module(position)
         Application.put_env(@app_name, mod, db)
 
-        Ecto.InstaShard.Sharding.create_repository_module(%{name: @repository_name, position: position, table: @table_name}, mod)
+        Ecto.InstaShard.Sharding.create_repository_module(%{position: position, table: @table_name}, mod)
 
         ecto_repos = Application.get_env(@app_name, :ecto_repos)
         Application.put_env(@app_name, :ecto_repos, ecto_repos ++ [mod])
@@ -82,7 +83,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def repository_module(position) do
-        repository_module_name(@repository_name, position)
+        repository_module_name(@base_module_name, @repository_name, position)
       end
 
       def check_tables_exists(directory \\ "scripts") do
