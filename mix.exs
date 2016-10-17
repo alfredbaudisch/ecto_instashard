@@ -28,6 +28,7 @@ defmodule Ecto.InstaShard.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:postgrex, ">= 0.0.0"},
-     {:ecto, "~> 2.0.0"}]
+     {:ecto, "~> 2.0.0"},
+     {:ex_doc, "~> 0.11.0", only: :dev}]
   end
 end
