@@ -16,7 +16,7 @@ Documentation: http://hexdocs.pm/ecto_instashard/
 - Extract the shard id from a given item id.
 - Functions to run queries in the correct physical and logical shard for a given item id.
 - Support to multiple sharded PostgreSQL clusters.
-- Dynamic sharded schemas, `next_id` functions and tables creation (by providing the SQL scripts).
+- Dynamic creation of sharded schemas, `next_id` functions and tables (by providing the SQL scripts).
 
 Your sharded id column must be based on Instagram's `next_id` function. Each logical shard must have its own function. See [Database Scripts and Migrations](#scripts) below to see how the functions and shard can be generated dynamically.
 
