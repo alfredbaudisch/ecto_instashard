@@ -7,11 +7,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       import Logger
       import Ecto.Query
 
-      if Keyword.has_key?(Mix.Project.config, :app) do
-        @app_name Mix.Project.config[:app]
-      else
-        @app_name :ecto_instashard
-      end
+      @app_name unquote(config[:app_name])
 
       @setup Application.get_env(@app_name, unquote(config[:config_key])) || [
         count: 0
@@ -74,7 +70,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         mod = repository_module(position)
         Application.put_env(@app_name, mod, db)
 
-        Ecto.InstaShard.Sharding.create_repository_module(%{position: position, table: @table_name}, mod)
+        Ecto.InstaShard.Sharding.create_repository_module(%{position: position, table: @table_name, app_name: @app_name, module: mod})
 
         ecto_repos = Application.get_env(@app_name, :ecto_repos)
         Application.put_env(@app_name, :ecto_repos, ecto_repos ++ [mod])

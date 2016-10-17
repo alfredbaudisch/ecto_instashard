@@ -63,6 +63,7 @@ Application.ensure_all_started(:postgrex)
 defmodule Ecto.InstaShard.Shards.Messages do
   use Ecto.InstaShard.Sharding.Setup, config: [
     config_key: :message_databases,
+    app_name: :ecto_instashard,
     base_module_name: Ecto.InstaShard.ShardedRepositories,
     name: "Messages",
     table: "messages",

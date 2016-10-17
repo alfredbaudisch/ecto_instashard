@@ -5,27 +5,23 @@ defmodule Ecto.InstaShard.Sharding do
   end
 
   # Create a repository module (to support multiple databases)
-  def create_repository_module(%{position: position, table: table}, mod) do
+  def create_repository_module(%{module: module} = params) do
     # Before trying to create the module, check whether is already defined or not
-    case :erlang.function_exported(mod, :__info__, 1) do
-      false -> do_create_module(mod, position, table)
+    case :erlang.function_exported(module, :__info__, 1) do
+      false -> do_create_module(params)
       _ -> nil
     end
 
-    mod
+    module
   end
 
   def repository_module_name(base, name, position) do
     Module.concat([base, "#{name}#{position}"])
   end
 
-  def do_create_module(name, position, table) do
-    Module.create(name, quote do
-      if Keyword.has_key?(Mix.Project.config, :app) do
-        use Ecto.Repo, otp_app: Mix.Project.config[:app]
-      else
-        use Ecto.Repo, otp_app: :ecto_instashard
-      end
+  def do_create_module(%{position: position, table: table, app_name: app_name, module: module}) do
+    Module.create(module, quote do
+      use Ecto.Repo, otp_app: unquote(app_name)
 
       def check_tables_exists(pos \\ unquote(position), table \\ unquote(table)) do
         result = run("SELECT EXISTS (
