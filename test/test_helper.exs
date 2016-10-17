@@ -81,8 +81,6 @@ import Supervisor.Spec, warn: false
 Supervisor.start_link(children, opts)
 
 defmodule Ecto.InstaShard.TestHelpers do
-  import Logger
-
   def create_message_tables do
     Ecto.InstaShard.Shards.Messages.check_tables_exists("test/scripts")
   end

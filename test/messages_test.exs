@@ -3,7 +3,6 @@ defmodule Ecto.InstaShard.Messages do
 
   import Ecto.InstaShard.Sharding.Hashing
   import Ecto.InstaShard.Shards.Messages
-  import Logger
 
   defmodule MessageSchema do
     use Ecto.Schema
@@ -37,15 +36,13 @@ defmodule Ecto.InstaShard.Messages do
 
   defmodule Randomize do
     def random(number) do
-      :random.seed(:erlang.now)
+      :random.seed(:os.timestamp)
       number = number * 10
       :random.uniform(number)
     end
   end
 
   setup_all do
-    Logger.debug "amount_shards #{@amount_shards}"
-    Logger.debug "amount_databases #{@amount_databases}"
     if @create_shards, do: Ecto.InstaShard.TestHelpers.create_message_tables
 
     user = %ShardInfo{id: Randomize.random(1000)}
@@ -102,29 +99,21 @@ defmodule Ecto.InstaShard.Messages do
     end
 
     test "inserted multiple item id contains correct shard_id" do
-      parent = self()
+      for n <- 1..@amount_items do
+        item = %ShardInfo{id: Randomize.random(n)}
+        item = %{item | hash: item_hash(item.id)}
+        item = %{item | logical_shard: shard(item.id)}
+        item = %{item | physical_shard: logical_to_physical(item.logical_shard)}
 
-      if @amount_items > 0 do
-        for n <- 1..@amount_items do
-          item = %ShardInfo{id: Randomize.random(n)}
-          item = %{item | hash: item_hash(item.id)}
-          item = %{item | logical_shard: shard(item.id)}
-          item = %{item | physical_shard: logical_to_physical(item.logical_shard)}
+        repo = repository(item.id)
+        Ecto.Adapters.SQL.Sandbox.checkout(repo)
 
-          repo = repository(item.id)
-          Ecto.Adapters.SQL.Sandbox.checkout(repo)
+        inserted = "insert into shard#{item.logical_shard}.messages (user_id, message)
+        VALUES (#{item.id}, '1') RETURNING id"
+        |> repo.run
 
-          inserted = "insert into shard#{item.logical_shard}.messages (user_id, message)
-          VALUES (#{item.id}, '1') RETURNING id"
-          |> repo.run
-
-          item_id = hd(hd(inserted.rows))
-
-          Logger.debug "n: #{n}, User id: #{item.id}, Item id: #{item_id}, logical_shard: #{item.logical_shard}, physical_shard: #{item.physical_shard}"
-          assert extract(item_id) == item.logical_shard
-        end
-      else
-        assert true == true
+        item_id = hd(hd(inserted.rows))
+        assert extract(item_id) == item.logical_shard
       end
     end
   end
