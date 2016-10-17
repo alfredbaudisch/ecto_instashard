@@ -1,5 +1,7 @@
 # Ecto.InstaShard
 
+> Dynamic Instagram-like PostgreSQL sharding with Ecto
+
 This library provides PostgreSQL physical (database) and logical (PostgreSQL schemas) sharding following [Instagram's pattern](http://instagram-engineering.tumblr.com/post/10853187575/sharding-ids-at-instagram).
 
 ## Main Features
@@ -18,7 +20,7 @@ An Ecto repository is created dynamically for each physical database provided as
 
 ## How to Use Ecto.InstaShard in an Application
 
-Along with the following documentation, you can also see example configuration and usage in the tests. 
+Along with the following documentation, you can also see example configuration and usage in the tests.
 
 ### Installation
 Add `ecto_instashard` to your list of dependencies in `mix.exs`:
@@ -227,3 +229,9 @@ Use the helper functions included in the shard module:
 - shard/1
 - shard_name/1
 - table/2, table/3
+
+## TODO
+
+- [ ] Example project
+- [ ] Helper functions documentation
+- [ ] Helper functions in a separate macro
