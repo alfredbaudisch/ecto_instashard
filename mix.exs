@@ -8,6 +8,8 @@ defmodule Ecto.InstaShard.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      docs: [source_ref: "v#{@version}", main: "readme", extras: ["README.md"]],
+     description: description(),
+     package: package(),
      deps: deps()]
   end
 
@@ -32,5 +34,20 @@ defmodule Ecto.InstaShard.Mixfile do
      {:ecto, "~> 2.0.0"},
      {:ex_doc, "~> 0.11.0", only: :dev},
      {:earmark, ">= 0.0.0"}]
+  end
+
+  defp description do
+    """
+    Dynamic Instagram-like PostgreSQL sharding with Ecto
+    """
+  end
+
+  defp package do
+    [name: :ecto_instashard,
+     maintainers: ["Alfred Reinold Baudisch"],
+     licenses: ["Apache 2.0"],
+     links: %{"GitHub" => "https://github.com/alfredbaudisch/ecto_instashard",
+              "Docs" => "http://hexdocs.pm/ecto_instashard/"},
+     files: ~w(mix.exs README.md lib LICENSE)]
   end
 end
