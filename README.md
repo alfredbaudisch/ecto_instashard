@@ -261,6 +261,7 @@ Use the helper functions included in the shard module:
 - [ ] Example project
 - [ ] Helper functions documentation
 - [ ] Helper functions in a separate macro
+- [ ] Support DDL in a single file instead of multiple files
 
 ## License
 
