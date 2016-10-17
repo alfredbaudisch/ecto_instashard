@@ -116,6 +116,27 @@ defmodule ChatApp.Shards.Messages do
 end
 ```
 
+### Add the Shard dynamic Ecto Repository to your Supervisor tree
+
+Include the dynamic supervisor related to your Shards into your Supervisor tree using `[ShardModule].include_repository_supervisor`.
+
+```elixir
+defmodule ChatApp do
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = []
+    |> ChatApp.Shards.Messages.include_repository_supervisor
+    # Your other children
+
+    opts = [strategy: :one_for_one, name: Fred.Data.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
 ### <a name="scripts"></a>Database Scripts and Migrations
 InstaShard can create your sharded tables and dynamic PostgreSQL schemas if you provide the related SQL scripts. Each script must contain one DDL command. Whenever you want to have the logical shard position defined, add `$1` to the DDL. Save the scripts in the folder `scripts` in your application and fill the list of SQL scripts as atoms in the Shard configuration, in the `scripts` key (as per previous example).
 
