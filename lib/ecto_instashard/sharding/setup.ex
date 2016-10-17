@@ -7,7 +7,13 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       import Logger
       import Ecto.Query
 
-      @setup Application.get_env(:ecto_instashard, unquote(config[:config_key])) || [
+      if Keyword.has_key?(Mix.Project.config, :app) do
+        @app_name Mix.Project.config[:app]
+      else
+        @app_name :ecto_instashard
+      end
+
+      @setup Application.get_env(@app_name, unquote(config[:config_key])) || [
         count: 0
       ]
 
@@ -65,12 +71,12 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
         db = Enum.at(@setup[:databases], position)
         mod = repository_module(position)
-        Application.put_env(:ecto_instashard, mod, db)
+        Application.put_env(@app_name, mod, db)
 
         Ecto.InstaShard.Sharding.create_repository_module(%{name: @repository_name, position: position, table: @table_name}, mod)
 
-        ecto_repos = Application.get_env(:ecto_instashard, :ecto_repos)
-        Application.put_env(:ecto_instashard, :ecto_repos, ecto_repos ++ [mod])
+        ecto_repos = Application.get_env(@app_name, :ecto_repos)
+        Application.put_env(@app_name, :ecto_repos, ecto_repos ++ [mod])
 
         mod
       end

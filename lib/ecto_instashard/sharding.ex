@@ -21,8 +21,11 @@ defmodule Ecto.InstaShard.Sharding do
 
   def do_create_module(name, position, table) do
     Module.create(name, quote do
-      # use Ecto.Repo, otp_app: Mix.Project.config[:app]
-      use Ecto.Repo, otp_app: :ecto_instashard
+      if Keyword.has_key?(Mix.Project.config, :app) do
+        use Ecto.Repo, otp_app: Mix.Project.config[:app]
+      else
+        use Ecto.Repo, otp_app: :ecto_instashard
+      end
 
       def check_tables_exists(pos \\ unquote(position), table \\ unquote(table)) do
         result = run("SELECT EXISTS (
