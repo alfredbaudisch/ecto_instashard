@@ -1,0 +1,1 @@
+CREATE SEQUENCE shard$1.message_seq;
