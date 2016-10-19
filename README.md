@@ -88,7 +88,7 @@ If you are only using sharded repositories, at the bottom of your config set:
 config :chat_app, ecto_repos: []
 ```
 
-If you also have normal Ecto repositories in your application, you can configure and use then as you always do, example:
+If you also have normal Ecto repositories in your application, you can configure and use them as you always do, example:
 
 ```elixir
 config :chat_app, ecto_repos: [ChatApp.Repositories.Accounts]
