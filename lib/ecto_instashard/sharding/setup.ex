@@ -125,7 +125,11 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       def table(user_id, table_name, :string), do: "shard#{shard(user_id)}.#{table_name}"
 
       def sharded_insert(user_id, changeset, opts) do
-        insert_all(user_id, @table_name, changeset, opts)
+        sharded_insert(user_id, @table_name, changeset, opts)
+      end
+
+      def sharded_insert(user_id, table_name, changeset, opts) do
+        insert_all(user_id, table_name, changeset, opts)
       end
 
       def insert_all(user_id, changeset, opts) when is_list(changeset) do

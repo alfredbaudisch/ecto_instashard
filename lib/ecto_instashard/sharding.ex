@@ -42,10 +42,11 @@ defmodule Ecto.InstaShard.Sharding do
   end
 
   def replace_and_run_script_sql(mod, script, param, directory \\ "scripts") do
-    replace_and_run_sql(mod, sql_file_to_string(script, directory), param)
+    sql_file_to_string(script, directory)
+    |> Enum.each(&replace_and_run_sql(&1, mod, param))
   end
 
-  def replace_and_run_sql(mod, sql, param) do
+  def replace_and_run_sql(sql, mod, param) do
     String.replace(sql, "$1", "#{param}")
     |> mod.run
   end
@@ -54,5 +55,6 @@ defmodule Ecto.InstaShard.Sharding do
     Path.join(directory, "#{Atom.to_string(script)}.sql")
     |> File.read!
     |> String.strip
+    |> String.split(~r{\n\n})
   end
 end
