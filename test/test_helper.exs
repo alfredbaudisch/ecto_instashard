@@ -68,7 +68,7 @@ defmodule Ecto.InstaShard.Shards.Messages do
     name: "Messages",
     table: "messages",
     system_env: "MESSAGE_DATABASES",
-    scripts: [:messages01_schema, :messages02_sequence, :messages03_next_id, :messages04_table],
+    scripts: [:messages],
     worker_name: Ecto.InstaShard.Repositories.Messages,
     supervisor_name: Ecto.InstaShard.Repositories.MessagesSupervisor
   ]
