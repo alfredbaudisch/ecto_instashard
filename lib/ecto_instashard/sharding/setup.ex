@@ -159,6 +159,16 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
       def get_all(user_id, table_name, where, select) do
         from(table_name, where: ^where, select: ^select)
+        |> do_get_all(user_id)
+      end
+
+      def get(user_id, table_name, where, select, limit \\ 1) do
+        from(table_name, where: ^where, select: ^select, limit: ^limit)
+        |> do_get_all(user_id)
+      end
+
+      def do_get_all(query, user_id) do
+        query
         |> add_query_prefix(user_id)
         |> repository(user_id).all
       end
