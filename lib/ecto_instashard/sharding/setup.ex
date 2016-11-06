@@ -98,6 +98,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def shard_name(user_id), do: "shard#{shard(user_id)}"
+      def shard_name(id, :extract), do: "shard#{Ecto.InstaShard.Sharding.Hashing.extract(id)}"
 
       def repository(user_id) do
         repository_from_shard(shard(user_id))
@@ -157,20 +158,42 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         %{query | prefix: shard_name(user_id)}
       end
 
+      def add_query_prefix(query, id, :extract) do
+        %{query | prefix: shard_name(id, :extract)}
+      end
+
       def get_all(user_id, table_name, where, select) do
         from(table_name, where: ^where, select: ^select)
         |> do_get_all(user_id)
       end
 
-      def get(user_id, table_name, where, select, limit \\ 1) do
+      def get_all(id, table_name, where, select, :extract) do
+        from(table_name, where: ^where, select: ^select)
+        |> do_get_all(id, :extract)
+      end
+
+      def get(user_id, table_name, where, select, limit) do
         from(table_name, where: ^where, select: ^select, limit: ^limit)
         |> do_get_all(user_id)
+      end
+
+      def get(id, table_name, where, select, limit, :extract) do
+        from(table_name, where: ^where, select: ^select, limit: ^limit)
+        |> do_get_all(id, :extract)
       end
 
       def do_get_all(query, user_id) do
         query
         |> add_query_prefix(user_id)
         |> repository(user_id).all
+      end
+
+      def do_get_all(query, id, :extract) do
+        shard = Ecto.InstaShard.Sharding.Hashing.extract(id)
+
+        query
+        |> add_query_prefix(id, :extract)
+        |> repository_from_shard(shard).all
       end
 
       def update_all(user_id, where, update, opts \\ []) do
