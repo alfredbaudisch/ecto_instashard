@@ -122,8 +122,8 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
       def table(user_id, :tuple), do: table(user_id, @table_name, :tuple)
       def table(user_id, :string), do: table(user_id, @table_name, :string)
-      def table(user_id, table_name, :tuple), do: {"shard#{shard(user_id)}", table_name}
-      def table(user_id, table_name, :string), do: "shard#{shard(user_id)}.#{table_name}"
+      def table(user_id, table_name, :tuple), do: {shard_name(user_id), table_name}
+      def table(user_id, table_name, :string), do: "#{shard_name(user_id)}.#{table_name}"
 
       def sharded_insert(user_id, changeset, opts) do
         sharded_insert(user_id, @table_name, changeset, opts)
