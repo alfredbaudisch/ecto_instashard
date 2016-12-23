@@ -43,18 +43,8 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       def setup_key(key), do: @setup[key]
 
       def repositories_to_load do
-        repositories = System.get_env(unquote(config[:system_env]))
-
-        if repositories != nil do
-          repositories = String.split(repositories, ",")
-
-          Enum.map(repositories, fn(x) ->
-            __MODULE__.create_repository_module(String.to_integer(x))
-          end)
-        else
-          for n <- 0..__MODULE__.setup_key(:count) - 1 do
-            __MODULE__.create_repository_module(n)
-          end
+        for n <- 0..__MODULE__.setup_key(:count) - 1 do
+          __MODULE__.create_repository_module(n)
         end
       end
 

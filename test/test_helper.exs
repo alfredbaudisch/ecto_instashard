@@ -7,7 +7,7 @@ message_databases = [
     password: "tester_FRED",
     database: "mt1",
     hostname: "localhost",
-    port: 5495,
+    port: 5496,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 2,
     ownership_timeout: 30_000
@@ -18,7 +18,7 @@ message_databases = [
     password: "tester_FRED",
     database: "mt2",
     hostname: "localhost",
-    port: 5495,
+    port: 5496,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 2,
     ownership_timeout: 30_000
@@ -29,7 +29,7 @@ message_databases = [
     password: "tester_FRED",
     database: "mt3",
     hostname: "localhost",
-    port: 5495,
+    port: 5496,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 2,
     ownership_timeout: 30_000
@@ -40,7 +40,7 @@ message_databases = [
     password: "tester_FRED",
     database: "mt4",
     hostname: "localhost",
-    port: 5495,
+    port: 5496,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 2,
     ownership_timeout: 30_000
@@ -67,7 +67,6 @@ defmodule Ecto.InstaShard.Shards.Messages do
     base_module_name: Ecto.InstaShard.ShardedRepositories,
     name: "Messages",
     table: "messages",
-    system_env: "MESSAGE_DATABASES",
     scripts: [:messages],
     worker_name: Ecto.InstaShard.Repositories.Messages,
     supervisor_name: Ecto.InstaShard.Repositories.MessagesSupervisor

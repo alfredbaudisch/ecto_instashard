@@ -111,7 +111,6 @@ defmodule ChatApp.Shards.Messages do
     name: "Messages",
     # the sharded table
     table: "messages",
-    system_env: "MESSAGE_DATABASES",
     scripts: [:messages],
     worker_name: ChatApp.Repositories.Messages,
     supervisor_name: ChatApp.Repositories.MessagesSupervisor
