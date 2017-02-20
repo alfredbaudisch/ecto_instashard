@@ -73,13 +73,24 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def check_tables_exists(directory \\ "scripts") do
-        for n <- 0..@setup[:logical_shards] - 1 do
-          mod = repository_module(logical_to_physical(n))
-
+        run_all_shards(fn(n, mod) ->
           case mod.check_tables_exists(n) do
             false -> create_tables(mod, n, directory)
             _ -> nil
           end
+        end)
+      end
+
+      def sql_all_shards(sql) do
+        run_all_shards(fn(n, mod) ->
+          Ecto.Adapters.SQL.query!(mod, sql |> String.replace("{shard}", "shard#{n}."))
+        end)
+      end
+
+      def run_all_shards(run) do
+        for n <- 0..@setup[:logical_shards] - 1 do
+          mod = repository_module(logical_to_physical(n))
+          run.(n, mod)
         end
       end
 
