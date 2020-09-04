@@ -59,6 +59,7 @@ Application.put_env(:ecto_instashard, :message_databases, [
 Application.put_env(:ecto_instashard, :ecto_repos, [])
 
 Application.ensure_all_started(:postgrex)
+Application.ensure_all_started(:ecto)
 
 defmodule Ecto.InstaShard.Shards.Messages do
   use Ecto.InstaShard.Sharding.Setup, config: [
