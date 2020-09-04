@@ -128,6 +128,8 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       def table(user_id, table_name, :tuple), do: {shard_name(user_id), table_name}
       def table(user_id, table_name, :string), do: "#{shard_name(user_id)}.#{table_name}"
 
+      defp append_shard_name_to_opts(opts, user_id), do: opts ++ [{:prefix, shard_name(user_id)}]
+
       def sharded_insert(user_id, changeset, opts) do
         sharded_insert(user_id, @table_name, changeset, opts)
       end
@@ -137,7 +139,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def insert_all(user_id, changeset, opts) when is_list(changeset) do
-        repository(user_id).insert_all table(user_id, :tuple), changeset, opts
+        repository(user_id).insert_all(@table_name, changeset, opts |> append_shard_name_to_opts(user_id))
       end
 
       def insert_all(user_id, changeset, opts) do
@@ -145,7 +147,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def insert_all(user_id, table_name, changeset, opts) when is_list(changeset) do
-        repository(user_id).insert_all table(user_id, table_name, :tuple), changeset, opts
+        repository(user_id).insert_all(table_name, changeset, opts |> append_shard_name_to_opts(user_id))
       end
 
       def insert_all(user_id, table_name, changeset, opts) do
