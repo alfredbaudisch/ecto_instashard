@@ -111,8 +111,10 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def create_tables(mod, n, directory) do
-        Enum.map(unquote(config[:scripts]), fn(script) ->
-          replace_and_run_script_sql(mod, script, n, directory)
+        mod.transaction(fn ->
+          Enum.map(unquote(config[:scripts]), fn(script) ->
+            replace_and_run_script_sql(mod, script, n, directory)
+          end)
         end)
       end
 
