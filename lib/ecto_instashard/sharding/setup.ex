@@ -33,7 +33,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
             worker_name: unquote(config[:worker_name]),
             utils: __MODULE__,
             name: unquote(config[:supervisor_name]),
-          }], [id: make_ref])]
+          }], [id: make_ref()])]
         else
           children
         end
@@ -94,15 +94,15 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         end
       end
 
-      def shard(user_id) do
-        rem(Ecto.InstaShard.Sharding.Hashing.item_hash(user_id), @setup[:logical_shards])
+      def shard(parent_id) do
+        rem(Ecto.InstaShard.Sharding.Hashing.item_hash(parent_id), @setup[:logical_shards])
       end
 
-      def shard_name(user_id), do: "shard#{shard(user_id)}"
+      def shard_name(parent_id), do: "shard#{shard(parent_id)}"
       def shard_name(id, :extract), do: "shard#{Ecto.InstaShard.Sharding.Hashing.extract(id)}"
 
-      def repository(user_id) do
-        repository_from_shard(shard(user_id))
+      def repository(parent_id) do
+        repository_from_shard(shard(parent_id))
       end
 
       def repository_from_shard(shard) do
@@ -118,58 +118,58 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         end)
       end
 
-      def run_sharded(user_id, sql) do
-        repo = repository(user_id)
+      def run_sharded(parent_id, sql) do
+        repo = repository(parent_id)
         sql |> repo.run
       end
 
-      def table(user_id, :tuple), do: table(user_id, @table_name, :tuple)
-      def table(user_id, :string), do: table(user_id, @table_name, :string)
-      def table(user_id, table_name, :tuple), do: {shard_name(user_id), table_name}
-      def table(user_id, table_name, :string), do: "#{shard_name(user_id)}.#{table_name}"
+      def table(parent_id, :tuple), do: table(parent_id, @table_name, :tuple)
+      def table(parent_id, :string), do: table(parent_id, @table_name, :string)
+      def table(parent_id, table_name, :tuple), do: {shard_name(parent_id), table_name}
+      def table(parent_id, table_name, :string), do: "#{shard_name(parent_id)}.#{table_name}"
 
-      defp append_shard_name_to_opts(opts, user_id), do: opts ++ [{:prefix, shard_name(user_id)}]
+      defp append_shard_name_to_opts(opts, parent_id), do: opts ++ [{:prefix, shard_name(parent_id)}]
 
-      def sharded_insert(user_id, changeset, opts) do
-        sharded_insert(user_id, @table_name, changeset, opts)
+      def sharded_insert(parent_id, changeset, opts) do
+        sharded_insert(parent_id, @table_name, changeset, opts)
       end
 
-      def sharded_insert(user_id, table_name, changeset, opts) do
-        insert_all(user_id, table_name, changeset, opts)
+      def sharded_insert(parent_id, table_name, changeset, opts) do
+        insert_all(parent_id, table_name, changeset, opts)
       end
 
-      def insert_all(user_id, changeset, opts) when is_list(changeset) do
-        repository(user_id).insert_all(@table_name, changeset, opts |> append_shard_name_to_opts(user_id))
+      def insert_all(parent_id, changeset, opts) when is_list(changeset) do
+        repository(parent_id).insert_all(@table_name, changeset, opts |> append_shard_name_to_opts(parent_id))
       end
 
-      def insert_all(user_id, changeset, opts) do
-        insert_all(user_id, [changeset], opts)
+      def insert_all(parent_id, changeset, opts) do
+        insert_all(parent_id, [changeset], opts)
       end
 
-      def insert_all(user_id, table_name, changeset, opts) when is_list(changeset) do
-        repository(user_id).insert_all(table_name, changeset, opts |> append_shard_name_to_opts(user_id))
+      def insert_all(parent_id, table_name, changeset, opts) when is_list(changeset) do
+        repository(parent_id).insert_all(table_name, changeset, opts |> append_shard_name_to_opts(parent_id))
       end
 
-      def insert_all(user_id, table_name, changeset, opts) do
-        insert_all(user_id, table_name, [changeset], opts)
+      def insert_all(parent_id, table_name, changeset, opts) do
+        insert_all(parent_id, table_name, [changeset], opts)
       end
 
-      def sharded_query(user_id, table_name, where) do
+      def sharded_query(parent_id, table_name, where) do
         from(m in table_name, where: ^where)
-        |> add_query_prefix(user_id)
+        |> add_query_prefix(parent_id)
       end
 
-      def add_query_prefix(query, user_id) do
-        %{query | prefix: shard_name(user_id)}
+      def add_query_prefix(query, parent_id) do
+        %{query | prefix: shard_name(parent_id)}
       end
 
       def add_query_prefix(query, id, :extract) do
         %{query | prefix: shard_name(id, :extract)}
       end
 
-      def get_all(user_id, table_name, where, select) do
+      def get_all(parent_id, table_name, where, select) do
         from(table_name, where: ^where, select: ^select)
-        |> do_get_all(user_id)
+        |> do_get_all(parent_id)
       end
 
       def get_all(id, table_name, where, select, :extract) do
@@ -177,9 +177,9 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         |> do_get_all(id, :extract)
       end
 
-      def get(user_id, table_name, where, select, limit) do
+      def get(parent_id, table_name, where, select, limit) do
         from(table_name, where: ^where, select: ^select, limit: ^limit)
-        |> do_get_all(user_id)
+        |> do_get_all(parent_id)
       end
 
       def get(id, table_name, where, select, limit, :extract) do
@@ -187,10 +187,10 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         |> do_get_all(id, :extract)
       end
 
-      def do_get_all(query, user_id) do
+      def do_get_all(query, parent_id) do
         query
-        |> add_query_prefix(user_id)
-        |> repository(user_id).all
+        |> add_query_prefix(parent_id)
+        |> repository(parent_id).all
       end
 
       def do_get_all(query, id, :extract) do
@@ -201,30 +201,30 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         |> repository_from_shard(shard).all
       end
 
-      def update_all(user_id, where, update, opts \\ []) do
-        update_all(user_id, @table_name, where, update, opts)
+      def update_all(parent_id, where, update, opts \\ []) do
+        update_all(parent_id, @table_name, where, update, opts)
       end
 
-      def update_all(user_id, table_name, where, update, opts) do
-        sharded_query(user_id, table_name, where)
-        |> repository(user_id).update_all([set: update], opts)
+      def update_all(parent_id, table_name, where, update, opts) do
+        sharded_query(parent_id, table_name, where)
+        |> repository(parent_id).update_all([set: update], opts)
       end
 
-      def update_with_query(user_id, query, update, opts) do
-        repository(user_id).update_all(query, [set: update], opts)
+      def update_with_query(parent_id, query, update, opts) do
+        repository(parent_id).update_all(query, [set: update], opts)
       end
 
-      def delete_all(user_id, where, opts \\ []) do
-        delete_all(user_id, @table_name, where, opts)
+      def delete_all(parent_id, where, opts \\ []) do
+        delete_all(parent_id, @table_name, where, opts)
       end
 
-      def delete_all(user_id, table_name, where, opts) do
-        sharded_query(user_id, table_name, where)
-        |> repository(user_id).delete_all(opts)
+      def delete_all(parent_id, table_name, where, opts) do
+        sharded_query(parent_id, table_name, where)
+        |> repository(parent_id).delete_all(opts)
       end
 
-      def delete_with_query(user_id, query, opts) do
-        repository(user_id).delete_all(query, opts)
+      def delete_with_query(parent_id, query, opts) do
+        repository(parent_id).delete_all(query, opts)
       end
     end
   end
