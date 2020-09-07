@@ -1,6 +1,7 @@
 defmodule Ecto.InstaShard.Messages do
   use ExUnit.Case, async: true
 
+  alias Ecto.InstaShard.Shards.Messages, as: Shards
   import Ecto.InstaShard.Sharding.Hashing
   import Ecto.InstaShard.Shards.Messages
 
@@ -12,7 +13,7 @@ defmodule Ecto.InstaShard.Messages do
 
     embedded_schema do
       field :message, :string
-      field :inserted_at, Ecto.DateTime
+      field :inserted_at, :naive_datetime
       field :user_id, :integer
     end
 
@@ -23,7 +24,6 @@ defmodule Ecto.InstaShard.Messages do
     end
   end
 
-  @amount_shards setup_key(:logical_shards)
   @amount_databases setup_key(:count)
   @base_module_name Ecto.InstaShard.ShardedRepositories
   @messages_repository "Messages"
@@ -37,9 +37,9 @@ defmodule Ecto.InstaShard.Messages do
 
   defmodule Randomize do
     def random(number) do
-      :random.seed(:os.timestamp)
+      :rand.seed(:exs64)
       number = number * 10
-      :random.uniform(number)
+      :rand.uniform(number)
     end
   end
 
@@ -70,6 +70,34 @@ defmodule Ecto.InstaShard.Messages do
   end
 
   describe "Sharding" do
+    @tag :select
+    test "select sharded items by id (extract shard id from item id)", %{res: user} do
+      message_id = sharded_insert(user)
+      [retrieved] = Shards.get_all(message_id, @messages_table, [id: message_id], [:user_id, :message], :extract)
+      assert retrieved.user_id == user.id
+      assert retrieved.message == "1"
+
+      # Get by limit (1 in this case)
+      [retrieved] = Shards.get(message_id, @messages_table, [id: message_id], [:user_id, :message], 1, :extract)
+      assert retrieved.user_id == user.id
+      assert retrieved.message == "1"
+    end
+
+    @tag :select
+    test "select sharded items by user_id", %{res: user} do
+      message_id = sharded_insert(user, "user message")
+      [retrieved] = Shards.get_all(user.id, @messages_table, [user_id: user.id], [:id, :user_id, :message])
+      assert retrieved.user_id == user.id
+      assert retrieved.message == "user message"
+      assert retrieved.id == message_id
+
+      # Get by limit (1 in this case)
+      [retrieved] = Shards.get(user.id, @messages_table, [user_id: user.id], [:id, :user_id, :message], 1)
+      assert retrieved.user_id == user.id
+      assert retrieved.message == "user message"
+      assert retrieved.id == message_id
+    end
+
     test "insert from changeset", %{res: user} do
       changeset = MessageSchema.changeset(%MessageSchema{}, %{
         user_id: user.id,
@@ -77,15 +105,15 @@ defmodule Ecto.InstaShard.Messages do
       })
 
       task = Task.async(fn ->
-        {_, [%{id: id}]} = Ecto.InstaShard.Shards.Messages.sharded_insert(user.id, changeset.changes, returning: [:id])
+        {_, [%{id: id}]} = Shards.sharded_insert(user.id, changeset.changes, returning: [:id])
         id
       end)
 
       inserted = Task.await(task)
       assert extract(inserted) == user.logical_shard
 
-      Ecto.InstaShard.Shards.Messages.update_all(user.id, [id: inserted], [message: "from changeset, updated"])
-      Ecto.InstaShard.Shards.Messages.delete_all(user.id, [id: inserted])
+      Shards.update_all(user.id, [id: inserted], [message: "from changeset, updated"])
+      Shards.delete_all(user.id, [id: inserted])
     end
 
     test "inserted item id contains correct shard_id", %{res: user} do
@@ -117,5 +145,16 @@ defmodule Ecto.InstaShard.Messages do
         assert extract(item_id) == item.logical_shard
       end
     end
+  end
+
+  defp sharded_insert(user, message \\ "1") do
+    repo = repository(user.id)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(repo)
+
+    %{rows: [[id]]} = "insert into shard#{user.logical_shard}.messages (user_id, message)
+    VALUES (#{user.id}, '#{message}') RETURNING id"
+    |> repo.run()
+
+    id
   end
 end
