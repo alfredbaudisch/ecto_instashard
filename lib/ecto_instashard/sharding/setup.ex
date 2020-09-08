@@ -177,6 +177,16 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         |> do_get_all(id, :extract)
       end
 
+      def get_all_ordered(parent_id, table_name, where, select, order_by) do
+        from(table_name, where: ^where, select: ^select, order_by: ^order_by)
+        |> do_get_all(parent_id)
+      end
+
+      def get_all_ordered(id, table_name, where, select, order_by, :extract) do
+        from(table_name, where: ^where, select: ^select, order_by: ^order_by)
+        |> do_get_all(id, :extract)
+      end
+
       def get(parent_id, table_name, where, select, limit) do
         from(table_name, where: ^where, select: ^select, limit: ^limit)
         |> do_get_all(parent_id)
@@ -184,6 +194,16 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
       def get(id, table_name, where, select, limit, :extract) do
         from(table_name, where: ^where, select: ^select, limit: ^limit)
+        |> do_get_all(id, :extract)
+      end
+
+      def get_ordered(parent_id, table_name, where, select, limit, order_by) do
+        from(table_name, where: ^where, select: ^select, limit: ^limit, order_by: ^order_by)
+        |> do_get_all(parent_id)
+      end
+
+      def get_ordered(id, table_name, where, select, limit, order_by, :extract) do
+        from(table_name, where: ^where, select: ^select, limit: ^limit, order_by: ^order_by)
         |> do_get_all(id, :extract)
       end
 
