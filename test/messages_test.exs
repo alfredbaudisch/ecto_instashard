@@ -11,7 +11,7 @@ defmodule Ecto.InstaShard.Messages do
 
     @required [:user_id, :message]
 
-    embedded_schema do
+    schema "messages" do
       field :message, :string
       field :inserted_at, :naive_datetime
       field :user_id, :integer
@@ -46,12 +46,7 @@ defmodule Ecto.InstaShard.Messages do
   setup_all do
     if @create_shards, do: Ecto.InstaShard.TestHelpers.create_message_tables
 
-    user = %ShardInfo{id: Randomize.random(1000)}
-    user = %{user | hash: item_hash(user.id)}
-    user = %{user | logical_shard: shard(user.id)}
-    user = %{user | physical_shard: logical_to_physical(user.logical_shard)}
-
-    {:ok, res: user}
+    {:ok, res: generate_user()}
   end
 
   describe "Repository Modules" do
@@ -69,9 +64,23 @@ defmodule Ecto.InstaShard.Messages do
     end
   end
 
+  describe "Batch Sharded Insert" do
+    @tag :batch
+    test "multiple items insert_all does not generate conflicting IDs", %{res: user} do
+      for _time <- 1..50 do
+        items = for pos <- 1..500  do
+          %{user_id: user.id, message: "message #{pos}"}
+        end
+
+        Shards.insert_all(user.id, MessageSchema, items, returning: true)
+      end
+    end
+  end
+
   describe "Sharding" do
     @tag :select
     test "select sharded items by id (extract shard id from item id)", %{res: user} do
+      user = generate_user(-2)
       message_id = sharded_insert(user)
       [retrieved] = Shards.get_all(message_id, @messages_table, [id: message_id], [:user_id, :message], :extract)
       assert retrieved.user_id == user.id
@@ -84,7 +93,8 @@ defmodule Ecto.InstaShard.Messages do
     end
 
     @tag :select
-    test "select sharded items by user_id", %{res: user} do
+    test "select sharded items by user_id" do
+      user = generate_user(-1)
       message_id = sharded_insert(user, "user message")
       [retrieved] = Shards.get_all(user.id, @messages_table, [user_id: user.id], [:id, :user_id, :message])
       assert retrieved.user_id == user.id
@@ -156,5 +166,14 @@ defmodule Ecto.InstaShard.Messages do
     |> repo.run()
 
     id
+  end
+
+  defp generate_user(id \\ nil)
+  defp generate_user(nil), do: generate_user(Randomize.random(1000))
+  defp generate_user(id) do
+    user = %ShardInfo{id: id}
+    user = %{user | hash: item_hash(user.id)}
+    user = %{user | logical_shard: shard(user.id)}
+    %{user | physical_shard: logical_to_physical(user.logical_shard)}
   end
 end
