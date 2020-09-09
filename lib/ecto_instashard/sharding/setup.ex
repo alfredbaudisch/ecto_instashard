@@ -21,6 +21,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       @mapping @setup[:mapping]
       @repository_name unquote(config[:name])
       @table_name unquote(config[:table])
+      @dynamic_init unquote(config[:dynamic_init])
 
       def include_repository_supervisor(children) do
         count = setup_key(:count)
@@ -60,7 +61,13 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         mod = repository_module(position)
         Application.put_env(@app_name, mod, db)
 
-        Ecto.InstaShard.Sharding.create_repository_module(%{position: position, table: @table_name, app_name: @app_name, module: mod})
+        Ecto.InstaShard.Sharding.create_repository_module(%{
+          position: position,
+          table: @table_name,
+          app_name: @app_name,
+          module: mod,
+          dynamic_init: @dynamic_init
+        })
 
         ecto_repos = Application.get_env(@app_name, :ecto_repos)
         Application.put_env(@app_name, :ecto_repos, ecto_repos ++ [mod])
