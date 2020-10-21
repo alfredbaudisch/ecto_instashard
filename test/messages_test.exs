@@ -1,6 +1,8 @@
 defmodule Ecto.InstaShard.Messages do
   use ExUnit.Case, async: true
 
+  import Ecto.Query
+
   alias Ecto.InstaShard.Shards.Messages, as: Shards
   import Ecto.InstaShard.Sharding.Hashing
   import Ecto.InstaShard.Shards.Messages
@@ -82,7 +84,8 @@ defmodule Ecto.InstaShard.Messages do
     test "select sharded items by id (extract shard id from item id)", %{res: user} do
       user = generate_user(-2)
       message_id = sharded_insert(user)
-      [retrieved] = Shards.get_all(message_id, @messages_table, [id: message_id], [:user_id, :message], :extract)
+      message_ids = [message_id]
+      [retrieved] = Shards.get_all(message_id, @messages_table, dynamic([q], q.id in ^message_ids), [:user_id, :message], :extract)
       assert retrieved.user_id == user.id
       assert retrieved.message == "1"
 
@@ -108,6 +111,7 @@ defmodule Ecto.InstaShard.Messages do
       assert retrieved.id == message_id
     end
 
+    @tag :insert_update
     test "insert from changeset", %{res: user} do
       changeset = MessageSchema.changeset(%MessageSchema{}, %{
         user_id: user.id,
@@ -122,7 +126,7 @@ defmodule Ecto.InstaShard.Messages do
       inserted = Task.await(task)
       assert extract(inserted) == user.logical_shard
 
-      Shards.update_all(user.id, [id: inserted], [message: "from changeset, updated"])
+      Shards.update_all(user.id, MessageSchema, [id: inserted], [message: "from changeset, updated"], [returning: true])
       Shards.delete_all(user.id, [id: inserted])
     end
 
