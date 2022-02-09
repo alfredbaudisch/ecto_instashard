@@ -66,8 +66,11 @@ defmodule Ecto.InstaShard.Sharding do
     |> mod.run()
   end
 
-  def sql_file_to_string(script, directory \\ "scripts") do
-    Path.join(directory, "#{Atom.to_string(script)}.sql")
+  def sql_file_to_string(script, directory \\ "scripts")
+  def sql_file_to_string(script, directory) when is_atom(script), do:
+    sql_file_to_string(Atom.to_string(script), directory)
+  def sql_file_to_string(script, directory) do
+    Path.join(directory, "#{script}.sql")
     |> File.read!()
     |> String.trim()
     |> String.split(~r/(\n\n|\r\n\r\n)/u)

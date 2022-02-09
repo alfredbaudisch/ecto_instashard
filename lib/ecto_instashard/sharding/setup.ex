@@ -88,6 +88,14 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         end)
       end
 
+      def sql_script_all_shards(script, directory \\ "scripts") do
+        run_all_shards(fn(n, mod) ->
+          mod.transaction(fn ->
+            replace_and_run_script_sql(mod, script, n, directory)
+         end)
+        end)
+      end
+
       def sql_all_shards(sql) do
         run_all_shards(fn(n, mod) ->
           Ecto.Adapters.SQL.query!(mod, sql |> String.replace("{shard}", "shard#{n}."))
