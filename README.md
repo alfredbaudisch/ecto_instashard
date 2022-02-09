@@ -32,7 +32,7 @@ Add `ecto_instashard` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ecto_instashard, "~> 0.3.2"}]
+  [{:ecto_instashard, "~> 0.3"}]
 end
 ```
 
