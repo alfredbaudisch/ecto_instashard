@@ -32,7 +32,7 @@ Add `ecto_instashard` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ecto_instashard, "~> 0.3"}]
+  [{:ecto_instashard, "~> 0.4"}]
 end
 ```
 
@@ -212,7 +212,7 @@ repository = ChatApp.Shards.Messages.repository(message.user_id)
 Use the helper functions included in the modules `Ecto.InstaShard.Shards.[Shard]` to perform operations in the correct shard for a user id.
 
 - add_query_prefix/2 (to add the related user_id sharded PostgreSQL schema name to the table name)
-- sharded_insert/3, sharded_query/3
+- sharded_insert/3, sharded_select_query/3, sharded_query/2, sharded_query_all/2, sharded_query_one/2
 - insert_all/3, insert_all/4 (supports schemaless changesets: `embedded_schema`)
 - update_all/4, update_all/5, update_with_query/4
 - delete_all/3, delete_all/4, delete_with_query/4

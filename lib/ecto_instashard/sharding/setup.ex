@@ -169,9 +169,24 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         insert_all(parent_id, table_name, [changeset], opts)
       end
 
-      def sharded_query(parent_id, table_name, where) do
+      def sharded_select_query(parent_id, table_name, where) do
         from(m in table_name, where: ^where)
         |> add_query_prefix(parent_id)
+      end
+
+      def sharded_query(parent_id, query) do
+        query
+        |> add_query_prefix(parent_id)
+      end
+
+      def sharded_query_all(parent_id, query) do
+        sharded_query(parent_id, query)
+        |> repository(parent_id).all()
+      end
+
+      def sharded_query_one(parent_id, query) do
+        sharded_query(parent_id, query)
+        |> repository(parent_id).one()
       end
 
       def add_query_prefix(query, parent_id) do
@@ -241,7 +256,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def update_all(parent_id, table_name, where, update, opts) do
-        sharded_query(parent_id, table_name, where)
+        sharded_select_query(parent_id, table_name, where)
         |> repository(parent_id).update_all([set: update], opts)
       end
 
@@ -254,7 +269,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def delete_all(parent_id, table_name, where, opts) do
-        sharded_query(parent_id, table_name, where)
+        sharded_select_query(parent_id, table_name, where)
         |> repository(parent_id).delete_all(opts)
       end
 
