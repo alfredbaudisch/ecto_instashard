@@ -109,6 +109,11 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         end
       end
 
+      def shard(parent_id) when is_binary(parent_id) do
+        {integer_id, _} = Integer.parse(parent_id)
+        shard(integer_id)
+      end
+
       def shard(parent_id) do
         rem(Ecto.InstaShard.Sharding.Hashing.item_hash(parent_id), @setup[:logical_shards])
       end
