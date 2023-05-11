@@ -32,7 +32,7 @@ Add `ecto_instashard` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ecto_instashard, "~> 0.5"}]
+  [{:ecto_instashard, "~> 0.6"}]
 end
 ```
 
@@ -140,24 +140,31 @@ end
 ```
 
 ### <a name="scripts"></a>Database Scripts and Migrations
-InstaShard can create your sharded tables and dynamic PostgreSQL schemas if you provide the related SQL scripts. Each DDL command must be separated by two blank lines. Whenever you want to have the logical shard position defined, add `$1` to the DDL. Save the scripts in the folder `scripts` in your application and fill the list of SQL scripts as atoms in the Shard configuration, in the `scripts` key (as per previous example).
+InstaShard can create your sharded tables and dynamic PostgreSQL schemas if you provide the related SQL scripts. Each DDL command must be separated by two blank lines.
+
+Replacement strings:
+- `$shard_pos$`: logical shard position.
+- `$shard_name$`: logical shard name, example: `shard0`.
+- `$shard$`: logical shard name followed by dot `.`, example: `shard0.`. Usage: `$shard$some_table_name`.
+
+Save the scripts in the folder `scripts` in your application and fill the list of SQL scripts as atoms in the Shard configuration, in the `scripts` key (as per previous example).
 
 Examples of scripts (these scripts are also inside `test/scripts`):
 
 ```sql
-CREATE SCHEMA shard$1;
+CREATE SCHEMA $shard_name$;
 
-CREATE SEQUENCE shard$1.message_seq;
+CREATE SEQUENCE $shard_name$.message_seq;
 
-CREATE OR REPLACE FUNCTION shard$1.next_id(OUT result bigint) AS $$
+CREATE OR REPLACE FUNCTION $shard_name$.next_id(OUT result bigint) AS $$
 DECLARE
     our_epoch bigint := 1314220021721;
     seq_id bigint;
     now_millis bigint;
-    shard_id int := $1;
+    shard_id int := $shard_pos$;
     max_shard_id bigint := 2048;
 BEGIN
-    SELECT nextval('shard$1.message_seq') % max_shard_id INTO seq_id;
+    SELECT nextval('$shard_name$.message_seq') % max_shard_id INTO seq_id;
     SELECT FLOOR(EXTRACT(EPOCH FROM clock_timestamp()) * 1000) INTO now_millis;
     result := (now_millis - our_epoch) << 23;
     result := result | (shard_id << 10);
@@ -165,8 +172,8 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE TABLE shard$1.messages (
-  id bigint not null default shard$1.next_id(),
+CREATE TABLE $shard_name$.messages (
+  id bigint not null default $shard_name$.next_id(),
   user_id int not null,
   message text NOT NULL,
   inserted_at timestamp with time zone default now() not null,

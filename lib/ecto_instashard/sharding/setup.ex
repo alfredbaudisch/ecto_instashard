@@ -89,16 +89,21 @@ defmodule Ecto.InstaShard.Sharding.Setup do
       end
 
       def sql_script_all_shards(script, directory \\ "scripts") do
-        run_all_shards(fn(n, mod) ->
+        run_all_shards(fn(pos, mod) ->
           mod.transaction(fn ->
-            replace_and_run_script_sql(mod, script, n, directory)
+            replace_and_run_script_sql(mod, script, pos, directory)
          end)
         end)
       end
 
       def sql_all_shards(sql) do
-        run_all_shards(fn(n, mod) ->
-          Ecto.Adapters.SQL.query!(mod, sql |> String.replace("{shard}", "shard#{n}."))
+        run_all_shards(fn(pos, mod) ->
+          Ecto.Adapters.SQL.query!(mod,
+            sql
+            |> String.replace("$shard_pos$", "#{pos}")
+            |> String.replace("$shard_name$", "shard#{pos}")
+            |> String.replace("$shard$", "shard#{pos}.")
+          )
         end)
       end
 
@@ -130,10 +135,10 @@ defmodule Ecto.InstaShard.Sharding.Setup do
         repository_module(physical)
       end
 
-      def create_tables(mod, n, directory) do
+      def create_tables(mod, pos, directory) do
         mod.transaction(fn ->
           Enum.map(unquote(config[:scripts]), fn(script) ->
-            replace_and_run_script_sql(mod, script, n, directory)
+            replace_and_run_script_sql(mod, script, pos, directory)
           end)
         end)
       end

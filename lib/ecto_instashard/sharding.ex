@@ -54,15 +54,18 @@ defmodule Ecto.InstaShard.Sharding do
     end, Macro.Env.location(__ENV__))
   end
 
-  def replace_and_run_script_sql(mod, script, param, directory \\ "scripts") do
+  def replace_and_run_script_sql(mod, script, pos, directory \\ "scripts") do
     sql_file_to_string(script, directory)
-    |> Enum.each(&replace_and_run_sql(&1, mod, param))
+    |> Enum.each(&replace_and_run_sql(&1, mod, pos))
   end
 
-  def replace_and_run_sql("", _mod, _param), do: :ok
+  def replace_and_run_sql("", _mod, _pos), do: :ok
 
-  def replace_and_run_sql(sql, mod, param) do
-    String.replace(sql, "$1", "#{param}")
+  def replace_and_run_sql(sql, mod, pos) do
+    sql
+    |> String.replace("$shard_pos$", "#{pos}")
+    |> String.replace("$shard_name$", "shard#{pos}")
+    |> String.replace("$shard$", "shard#{pos}.")
     |> mod.run()
   end
 
