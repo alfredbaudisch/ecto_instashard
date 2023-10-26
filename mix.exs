@@ -19,7 +19,7 @@ defmodule Ecto.InstaShard.Mixfile do
 
   defp deps do
     [{:postgrex, "~> 0.13"},
-     {:ecto, "~> 2.2"},
+     {:ecto, "~> 3.10"},
      {:ex_doc, "~> 0.19.0", only: :dev},
      {:earmark, ">= 0.0.0"}]
   end
