@@ -3,8 +3,8 @@ defmodule Ecto.InstaShard.Mixfile do
 
   def project do
     [app: :ecto_instashard,
-     version: "0.6.0",
-     elixir: "~> 1.3",
+     version: "0.7.0",
+     elixir: "~> 1.10",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      docs: [source_ref: "v0.2.1", main: "readme", extras: ["README.md"]],
@@ -19,7 +19,7 @@ defmodule Ecto.InstaShard.Mixfile do
 
   defp deps do
     [{:postgrex, "~> 0.13"},
-     {:ecto, "~> 2.2"},
+     {:ecto, "~> 3.10"},
      {:ex_doc, "~> 0.19.0", only: :dev},
      {:earmark, ">= 0.0.0"}]
   end

@@ -9,7 +9,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
       @app_name unquote(config[:app_name])
 
-      @setup Application.get_env(@app_name, unquote(config[:config_key])) || [
+      @setup Application.compile_env!(@app_name, unquote(config[:config_key])) || [
         count: 0
       ]
 
@@ -30,11 +30,14 @@ defmodule Ecto.InstaShard.Sharding.Setup do
           import Supervisor.Spec, warn: false
 
           children ++ [
-            supervisor(Ecto.InstaShard.Repositories.ShardedSupervisor, [%{
-            worker_name: unquote(config[:worker_name]),
-            utils: __MODULE__,
-            name: unquote(config[:supervisor_name]),
-          }], [id: make_ref()])]
+            Supervisor.child_spec(
+              {Ecto.InstaShard.Repositories.ShardedSupervisor, %{
+                worker_name: unquote(config[:worker_name]),
+                name: unquote(config[:supervisor_name]),
+                utils: __MODULE__
+              }}, id: make_ref()
+            )
+          ]
         else
           children
         end

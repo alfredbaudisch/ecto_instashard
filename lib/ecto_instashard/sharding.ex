@@ -1,7 +1,7 @@
 defmodule Ecto.InstaShard.Sharding do
   def include_repository_supervisor(children, repository) do
     import Supervisor.Spec, warn: false
-    children ++ [supervisor(repository, [])]
+    children ++ [repository]
   end
 
   # Create a repository module (to support multiple databases)
@@ -21,7 +21,9 @@ defmodule Ecto.InstaShard.Sharding do
 
   def do_create_module(%{position: position, table: table, app_name: app_name, module: module, dynamic_init: dynamic_init}) do
     Module.create(module, quote do
-      use Ecto.Repo, otp_app: unquote(app_name)
+      use Ecto.Repo,
+        otp_app: unquote(app_name),
+        adapter: Ecto.Adapters.Postgres
 
       def check_tables_exists(pos \\ unquote(position), table \\ unquote(table)) do
         result = run("SELECT EXISTS (
