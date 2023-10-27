@@ -9,7 +9,7 @@ defmodule Ecto.InstaShard.Sharding.Setup do
 
       @app_name unquote(config[:app_name])
 
-      @setup Application.get_env(@app_name, unquote(config[:config_key])) || [
+      @setup Application.compile_env!(@app_name, unquote(config[:config_key])) || [
         count: 0
       ]
 
