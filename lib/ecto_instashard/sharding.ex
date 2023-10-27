@@ -1,7 +1,7 @@
 defmodule Ecto.InstaShard.Sharding do
   def include_repository_supervisor(children, repository) do
     import Supervisor.Spec, warn: false
-    children ++ [supervisor(repository, [])]
+    children ++ [repository]
   end
 
   # Create a repository module (to support multiple databases)

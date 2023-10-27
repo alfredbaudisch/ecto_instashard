@@ -7,9 +7,9 @@ defmodule Ecto.InstaShard.Repositories.ShardedSupervisor do
 
   def init(%{utils: utils, worker_name: name} = _) do
     children = Enum.map(utils.repositories_to_load, fn(mod) ->
-      worker(mod, [], [id: make_ref(), name: name])
+      Supervisor.child_spec(mod, id: make_ref())
     end)
 
-    supervise(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end
