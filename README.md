@@ -5,7 +5,7 @@
 
 > Dynamic Instagram-like PostgreSQL sharding with Ecto
 
-This library provides PostgreSQL physical (database) and logical (PostgreSQL schemas) sharding following [Instagram's pattern](http://media.postgresql.org/sfpug/instagram_sfpug.pdf).
+This library provides PostgreSQL physical (database) and logical (PostgreSQL schemas) sharding following [Instagram's pattern](http://media.postgresql.org/sfpug/instagram_sfpug.pdf) ([alternative](https://archive.org/details/postgresql_sharding_instagram)).
 
 Documentation: http://hexdocs.pm/ecto_instashard/
 
